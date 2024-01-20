@@ -1,0 +1,19 @@
+.cardText {
+    white-space: pre-line;
+}
+
+.cardBody {
+    overflow: hidden;
+    mask-image: linear-gradient(180deg, #000 98%, transparent);
+}
+
+.noteCard {
+    background-color: cornsilk;
+}
+
+.flexCentre{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
