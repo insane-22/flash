@@ -2,26 +2,32 @@ import { useEffect, useState } from "react";
 import { NoteModel } from "./models/note";
 // import axios from "axios";
 import Note from "./components/Note";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import styles from "./styles/Notepage.module.css";
 import * as NotesApi from "./api/notes";
 import Swal from "sweetalert2";
 import AddEditNote from "./components/AddEditNote";
 
 function App() {
+  const [loading, setLoading] = useState(true);
+  const [showLoadingError, setShowLoadingError] = useState(false);
   const [notes, setNotes] = useState<NoteModel[]>([]);
   const [showAddNote, setShowAddNote] = useState(false);
   const [noteToEdit, setNoteToEdit] = useState<NoteModel | null>(null);
 
   const getAllNotes = async () => {
     try {
+      setLoading(true);
+      setShowLoadingError(false);
       const data = await NotesApi.fetchNotes();
       if (data.success) {
         setNotes(data?.notes);
       }
     } catch (error) {
-      // console.log(error);
-      // alert(error);
+      console.log(error);
+      setShowLoadingError(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,23 +57,35 @@ function App() {
     }
   };
 
+  const noteArea = (
+    <Row xs={1} md={2} xl={3} className={`g-4 ${styles.noteArea}`}>
+      {notes?.map((note) => (
+        <Col key={note._id}>
+          <Note
+            note={note}
+            className={styles.note}
+            onDeleteNoteClicked={deleteNote}
+            onNoteClicked={setNoteToEdit}
+          />
+        </Col>
+      ))}
+    </Row>
+  );
+
   return (
-    <Container>
+    <Container className={styles.notePage}>
       <Button className="mb-4" onClick={() => setShowAddNote(true)}>
         Add Note
       </Button>
-      <Row xs={1} md={2} xl={3} className="g-4">
-        {notes?.map((note) => (
-          <Col key={note._id}>
-            <Note
-              note={note}
-              className={styles.note}
-              onDeleteNoteClicked={deleteNote}
-              onNoteClicked={setNoteToEdit}
-            />
-          </Col>
-        ))}
-      </Row>
+
+      {loading && <Spinner animation="grow" variant="dark"/>}
+      {showLoadingError && <p>Something Went Wrong. Please Try Again</p>}
+      {!loading && !showLoadingError && 
+      <>
+      {notes.length>0 ? noteArea : <p>You don't have any notes yet!</p>}
+      </>
+      }
+
       {showAddNote && (
         <AddEditNote
           onDismiss={() => setShowAddNote(false)}
@@ -82,7 +100,7 @@ function App() {
           noteToEdit={noteToEdit}
           onDismiss={() => setNoteToEdit(null)}
           onSave={() => {
-            // 
+            //
             getAllNotes();
             setNoteToEdit(null);
           }}
