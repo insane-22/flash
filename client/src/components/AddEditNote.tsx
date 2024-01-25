@@ -4,31 +4,32 @@ import { useForm } from "react-hook-form";
 import { NoteInput } from "../api/notes";
 import * as NotesApi from "../api/notes";
 import Swal from "sweetalert2";
+import InputField from "./form/InputField";
 
 interface AddEditNoteProps {
-  noteToEdit?:NoteModel;
+  noteToEdit?: NoteModel;
   onDismiss: () => void;
   onSave: (note: NoteModel) => void;
 }
 
-const AddEditNote = ({noteToEdit, onDismiss, onSave }: AddEditNoteProps) => {
+const AddEditNote = ({ noteToEdit, onDismiss, onSave }: AddEditNoteProps) => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<NoteInput>({
-    defaultValues:{
+    defaultValues: {
       title: noteToEdit?.title || "",
       text: noteToEdit?.text || "",
-    }
+    },
   });
 
   const onSubmit = async (input: NoteInput) => {
     try {
       let noteResponse: NoteModel;
-      if(noteToEdit){
-        noteResponse = await NotesApi.updateNote(noteToEdit._id,input)
-      }else{
+      if (noteToEdit) {
+        noteResponse = await NotesApi.updateNote(noteToEdit._id, input);
+      } else {
         noteResponse = await NotesApi.createNote(input);
       }
       onSave(noteResponse);
@@ -51,28 +52,25 @@ const AddEditNote = ({noteToEdit, onDismiss, onSave }: AddEditNoteProps) => {
 
       <Modal.Body>
         <Form id="addEditNoteForm" onSubmit={handleSubmit(onSubmit)}>
-          <Form.Group className="mb-3">
-            <Form.Label>Title</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Title"
-              isInvalid={!!errors.title}
-              {...register("title", { required: "Required" })}
-            ></Form.Control>
-            <Form.Control.Feedback type="invalid">
-              {errors.title?.message}
-            </Form.Control.Feedback>
-          </Form.Group>
+          <InputField
+            name="title"
+            label="Title"
+            type="text"
+            placeholder="Title"
+            register={register}
+            registerOptions={{ required: true }}
+            error={errors.title}
+          />
 
-          <Form.Group className="mb-3">
-            <Form.Label>Text</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={5}
-              placeholder="Text"
-              {...register("text")}
-            ></Form.Control>
-          </Form.Group>
+          <InputField
+            name="text"
+            label="Text"
+            type="text"
+            register={register}
+            as="textarea"
+            rows={5}
+            placeholder="Text"
+          />
         </Form>
       </Modal.Body>
 

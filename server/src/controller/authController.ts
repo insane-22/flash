@@ -1,6 +1,8 @@
 import { RequestHandler } from "express";
 import UserModel from "../models/userSchema";
+import env from "../util/validateEnv";
 import { comparePassword, hashPassword } from "./../helpers/authHelper";
+import JWT from "jsonwebtoken";
 
 export const getAuthenticatedUser: RequestHandler = async (req, res) => {
   const authenticatedId = req.session.userId;
@@ -67,12 +69,15 @@ export const registerController: RequestHandler<
       email,
     }).save();
 
-    req.session.userId = user._id;
+    const token = JWT.sign({ _id: user._id }, env.SECRET, {
+      expiresIn: "1d",
+    });
 
-    return res.status(201).send({
+    res.status(200).send({
       success: true,
-      message: "Registration successful!",
+      message: "All Notes",
       user,
+      token,
     });
   } catch (error) {
     return res.status(500).send({
@@ -121,11 +126,15 @@ export const loginController: RequestHandler<
       });
     }
 
-    req.session.userId = user._id;
+    const token = JWT.sign({ _id: user._id }, env.SECRET, {
+      expiresIn: "1d",
+    });
+
     res.status(200).send({
       success: true,
       message: "Login Successful",
       user,
+      token,
     });
   } catch (error) {
     console.log(error);
@@ -135,18 +144,4 @@ export const loginController: RequestHandler<
       error,
     });
   }
-};
-
-export const logoutController: RequestHandler = async (req, res) => {
-  req.session.destroy((error) => {
-    if (error) {
-      return res.status(500).send({
-        success: false,
-        message: "Error",
-        error,
-      });
-    } else {
-      res.sendStatus(200);
-    }
-  });
 };
