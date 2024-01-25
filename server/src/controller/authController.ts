@@ -4,33 +4,6 @@ import env from "../util/validateEnv";
 import { comparePassword, hashPassword } from "./../helpers/authHelper";
 import JWT from "jsonwebtoken";
 
-export const getAuthenticatedUser: RequestHandler = async (req, res) => {
-  const authenticatedId = req.session.userId;
-  try {
-    if (!authenticatedId) {
-      return res.status(401).send({
-        success: false,
-        message: "Unauthenticated User",
-      });
-    }
-    const user = await UserModel.findById(authenticatedId)
-      .select("+email")
-      .exec();
-
-    return res.status(201).send({
-      success: true,
-      message: "Authentication successful!",
-      user,
-    });
-  } catch (error) {
-    return res.status(500).send({
-      success: false,
-      message: "Error in authentication",
-      error,
-    });
-  }
-};
-
 interface RegisterBody {
   username?: string;
   email?: string;

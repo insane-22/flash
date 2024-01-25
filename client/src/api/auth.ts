@@ -36,15 +36,6 @@ async function fetchData<T>(
   }
 }
 
-export async function fetchUser(): Promise<User> {
-  const response = await fetchData<User>(
-    "http://localhost:8000/api/v1/auth",
-    "GET"
-  );
-  // console.log(typeof response.data)
-  return response.data;
-}
-
 export interface RegisterParams {
   username: string;
   email: string;
